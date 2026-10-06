@@ -68,7 +68,7 @@ func (h *Handler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	// path: /api/rooms/{id}/messages
 	parts := strings.Split(r.URL.Path, "/")
 	// ["", "api", "rooms", "{id}", "messages"]
-	if len(parts) < 5 {
+	if len(parts) < 5 || parts[3] == "" || parts[4] != "messages" {
 		http.Error(w, "bad path", http.StatusBadRequest)
 		return
 	}
