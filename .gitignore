@@ -1,0 +1,17 @@
+# Binary
+go-chat
+go-chat.exe
+
+# Env
+.env
+
+# Test cache
+*.test
+*.out
+
+# IDE
+.idea/
+.vscode/
+
+# SDD workspace (superpowers scratch)
+.superpowers/
