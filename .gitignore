@@ -13,5 +13,6 @@ go-chat.exe
 .idea/
 .vscode/
 
-# SDD workspace (superpowers scratch)
+# Superpowers scratch
 .superpowers/
+docs/superpowers/
