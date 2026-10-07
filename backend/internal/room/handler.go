@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bagoesrex/go-chat/internal/ctxkey"
+	"github.com/bagoesrex/go-chat/backend/internal/ctxkey"
 )
 
 type Handler struct{ repo *Repository }

@@ -1,4 +1,4 @@
-module github.com/bagoesrex/go-chat
+module github.com/bagoesrex/go-chat/backend
 
 go 1.27.1
 

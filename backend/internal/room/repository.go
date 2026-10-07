@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/bagoesrex/go-chat/internal/user"
+	"github.com/bagoesrex/go-chat/backend/internal/user"
 )
 
 type Room struct {

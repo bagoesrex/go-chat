@@ -1,0 +1,10 @@
+# Binary
+go-chat
+go-chat.exe
+
+# Env
+.env
+
+# Test cache
+*.test
+*.out

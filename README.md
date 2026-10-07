@@ -2,6 +2,15 @@
 
 Platform chat realtime berbasis Go backend + Vite React Bun frontend.
 
+## Struktur Project
+
+```
+go-chat/
+├── backend/    # Go API server
+├── frontend/   # Vite + React + Bun (coming soon)
+└── docs/
+```
+
 ## Dokumentasi
 
 - [Design Document](docs/design.md) — arsitektur, skema DB, REST API, WebSocket protocol
@@ -20,14 +29,15 @@ Platform chat realtime berbasis Go backend + Vite React Bun frontend.
 
 ```bash
 # 1. Salin env dan isi nilainya
-cp .env.example .env
+cp backend/.env.example backend/.env
 
-# 2. Edit .env
+# 2. Edit backend/.env
 # DB_URL=postgres://user:pass@localhost:5432/gochat?sslmode=disable
 # JWT_SECRET=changeme
 # PORT=8080
 
-# 3. Jalankan (migrasi otomatis berjalan saat startup)
+# 3. Jalankan dari dalam folder backend (migrasi otomatis berjalan saat startup)
+cd backend
 go run main.go
 ```
 

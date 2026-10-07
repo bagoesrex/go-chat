@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bagoesrex/go-chat/internal/ctxkey"
+	"github.com/bagoesrex/go-chat/backend/internal/ctxkey"
 )
 
 type Handler struct{ repo *Repository }

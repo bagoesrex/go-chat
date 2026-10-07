@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bagoesrex/go-chat/internal/auth"
-	"github.com/bagoesrex/go-chat/internal/user"
+	"github.com/bagoesrex/go-chat/backend/internal/auth"
+	"github.com/bagoesrex/go-chat/backend/internal/user"
 	"github.com/gorilla/websocket"
 )
 
