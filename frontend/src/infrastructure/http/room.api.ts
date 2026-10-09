@@ -13,6 +13,13 @@ export const roomApi: RoomRepository = {
     })
     return res.json()
   },
+  async createDM(targetUserId) {
+    const res = await apiFetch('/api/rooms/dm', {
+      method: 'POST',
+      body: JSON.stringify({ target_user_id: targetUserId }),
+    })
+    return res.json()
+  },
   async getMessages(roomId, before, limit = 50) {
     const params = new URLSearchParams({ limit: String(limit) })
     if (before) params.set('before', before)

@@ -1,0 +1,78 @@
+.toggleBtn {
+  margin: 0.75rem 1rem;
+  background: none;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 100ms, box-shadow 100ms;
+}
+
+.toggleBtn:hover {
+  transform: translate(-2px,-2px);
+  box-shadow: var(--shadow);
+}
+
+.panel {
+  border-bottom: var(--border);
+}
+
+.searchRow {
+  display: flex;
+  border-bottom: var(--border);
+}
+
+.input {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+}
+
+.input:focus {
+  background: #fff;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  border-left: var(--border);
+  padding: 0 0.75rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.list {
+  list-style: none;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.userItem {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 80ms;
+}
+
+.userItem:hover:not(:disabled) {
+  background: rgba(10,10,10,0.06);
+}
+
+.empty {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
