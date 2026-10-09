@@ -1,0 +1,102 @@
+.shell {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Mobile: sidebar & main stack, toggle via class ── */
+.sidebar {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  border-right: var(--border);
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.sidebarVisible {
+  display: flex;
+}
+
+.main {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mainVisible {
+  display: flex;
+}
+
+/* ── md+: both visible side-by-side ── */
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+    width: 260px;
+    min-width: 260px;
+  }
+
+  .main {
+    display: flex;
+  }
+
+  .backBtn {
+    display: none;
+  }
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: var(--border);
+  gap: 0.5rem;
+}
+
+.logo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  flex: 1;
+}
+
+.whoami {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  border-bottom: var(--border);
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  color: var(--fg);
+}
+
+.backBtn {
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: var(--border);
+  cursor: pointer;
+  text-align: left;
+  color: var(--fg);
+}
+
+.backBtn:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}

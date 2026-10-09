@@ -1,7 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '@/features/auth/login.page'
 import { RegisterPage } from '@/features/auth/register.page'
-import { RoomsPage } from '@/features/rooms/rooms.page'
+import { RoomsLayout } from '@/features/rooms/rooms.layout'
+import { ChatPage } from '@/features/chat/chat.page'
 import { RequireAuth, RedirectIfAuth } from './guards'
 
 export function App() {
@@ -13,7 +14,9 @@ export function App() {
           <Route path="/register" element={<RegisterPage />} />
         </Route>
         <Route element={<RequireAuth />}>
-          <Route path="/rooms" element={<RoomsPage />} />
+          <Route path="/rooms" element={<RoomsLayout />}>
+            <Route path=":id" element={<ChatPage />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/rooms" replace />} />
       </Routes>

@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: var(--border);
+  gap: 0.5rem;
+}
+
+.heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex: 1;
+}
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: var(--border);
+}
+
+.hint {
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+}
