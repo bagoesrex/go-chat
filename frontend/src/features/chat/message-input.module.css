@@ -1,0 +1,44 @@
+.form {
+  display: flex;
+  gap: 0;
+  border-top: var(--border);
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+}
+
+.input:focus {
+  background: #fff;
+}
+
+.sendBtn {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-left: var(--border);
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  transition: background 100ms;
+  flex-shrink: 0;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: #222;
+}
+
+.sendBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

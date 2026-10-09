@@ -2,7 +2,9 @@ import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useRoomStore } from '@/store/room.store'
 import { useChatStore } from '@/store/chat.store'
+import { wsJoin, wsLeave } from '@/infrastructure/ws/socket'
 import { MessageList } from './message-list'
+import { MessageInput } from './message-input'
 import styles from './chat.module.css'
 
 export function ChatPage() {
@@ -13,9 +15,13 @@ export function ChatPage() {
   const fetched = useRef<Record<string, boolean>>({})
 
   useEffect(() => {
-    if (!id || fetched.current[id]) return
-    fetched.current[id] = true
-    fetchMessages(id)
+    if (!id) return
+    wsJoin(id)
+    if (!fetched.current[id]) {
+      fetched.current[id] = true
+      fetchMessages(id)
+    }
+    return () => { wsLeave(id) }
   }, [id, fetchMessages])
 
   if (!room) return null
@@ -31,6 +37,7 @@ export function ChatPage() {
         </span>
       </header>
       <MessageList roomId={id!} messages={msgs} loading={isLoading} />
+      <MessageInput roomId={id!} />
     </div>
   )
 }
