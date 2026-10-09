@@ -1,0 +1,73 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Logo } from '@/icons/logo'
+import { useAuthStore } from '@/store/auth.store'
+import styles from './auth.module.css'
+
+export function LoginPage() {
+  const navigate = useNavigate()
+  const login = useAuthStore((s) => s.login)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await login(email, password)
+      if (document.startViewTransition) {
+        document.startViewTransition(() => { navigate('/rooms') })
+      } else {
+        navigate('/rooms')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login gagal')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <div className={styles.brand}>
+          <Logo size={40} />
+          <span className={styles.brandName}>go-chat</span>
+        </div>
+        <h1 className={styles.title}>Masuk</h1>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <Input
+            id="email"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+          />
+          <Input
+            id="password"
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {error && <p className={styles.errorMsg}>{error}</p>}
+          <Button type="submit" loading={loading} style={{ width: '100%' }}>
+            Masuk
+          </Button>
+        </form>
+        <p className={styles.footer}>
+          Belum punya akun?{' '}
+          <Link to="/register" className={styles.link}>Daftar</Link>
+        </p>
+      </div>
+    </div>
+  )
+}

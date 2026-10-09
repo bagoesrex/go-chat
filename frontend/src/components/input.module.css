@@ -1,0 +1,37 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  padding: 0.65rem 0.8rem;
+  border: var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+  width: 100%;
+  transition: box-shadow 150ms;
+}
+
+.input:focus {
+  box-shadow: var(--shadow);
+}
+
+.hasError {
+  border-color: var(--accent);
+}
+
+.error {
+  font-size: 0.8rem;
+  color: var(--accent);
+}
