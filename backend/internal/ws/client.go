@@ -143,7 +143,12 @@ func (c *Client) handleChat(roomID, content string) {
 			"room_id": roomID,
 			"message": msg,
 		})
-		c.hub.Broadcast <- broadcastMsg{roomID: roomID, payload: payload}
+		memberIDs, err := c.hub.roomRepo.GetRoomMemberIDs(context.Background(), roomID)
+		if err == nil && len(memberIDs) > 0 {
+			c.hub.BroadcastToMembers(memberIDs, payload, nil)
+		} else {
+			c.hub.Broadcast <- broadcastMsg{roomID: roomID, payload: payload}
+		}
 	})
 }
 

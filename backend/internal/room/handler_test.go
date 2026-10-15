@@ -39,3 +39,14 @@ func TestJoinRoom_MissingID(t *testing.T) {
 		t.Errorf("got %d, want %d", rr.Code, http.StatusBadRequest)
 	}
 }
+
+func TestMarkRoomAsRead_MissingID(t *testing.T) {
+	h := &Handler{repo: nil, notifier: nil}
+	req := httptest.NewRequest("POST", "/api/rooms//read", nil)
+	ctx := context.WithValue(req.Context(), ctxkey.UserIDKey, "user-123")
+	rr := httptest.NewRecorder()
+	h.MarkRoomAsRead(rr, req.WithContext(ctx))
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("got %d, want %d", rr.Code, http.StatusBadRequest)
+	}
+}

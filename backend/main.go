@@ -50,6 +50,7 @@ func main() {
 	mux.Handle("POST /api/rooms", jwtMiddleware(http.HandlerFunc(roomHandler.CreateRoom)))
 	mux.Handle("POST /api/rooms/dm", jwtMiddleware(http.HandlerFunc(roomHandler.CreateDM)))
 	mux.Handle("POST /api/rooms/{id}/join", jwtMiddleware(http.HandlerFunc(roomHandler.JoinRoom)))
+	mux.Handle("POST /api/rooms/{id}/read", jwtMiddleware(http.HandlerFunc(roomHandler.MarkRoomAsRead)))
 	mux.Handle("GET /api/rooms/", jwtMiddleware(http.HandlerFunc(roomHandler.GetMessages)))
 
 	// WebSocket

@@ -10,11 +10,12 @@ import (
 )
 
 type Room struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	IsDM      bool      `json:"is_dm"`
-	CreatedBy string    `json:"created_by"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	IsDM        bool      `json:"is_dm"`
+	CreatedBy   string    `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UnreadCount int       `json:"unread_count"`
 }
 
 type ExploreRoom struct {
@@ -65,10 +66,20 @@ func (r *Repository) GetRoomByID(ctx context.Context, roomID, userID string) (Ro
 		            )
 		            ELSE r.name
 		        END,
-		        r.is_dm, r.created_by, r.created_at
+		        r.is_dm, r.created_by, r.created_at,
+		        COALESCE((
+		            SELECT COUNT(*)
+		            FROM messages m
+		            WHERE m.room_id = r.id
+		              AND m.sender_id != $1
+		              AND NOT EXISTS (
+		                  SELECT 1 FROM message_reads mr 
+		                  WHERE mr.message_id = m.id AND mr.user_id = $1
+		              )
+		        ), 0) AS unread_count
 		 FROM rooms r
 		 WHERE r.id=$2`, userID, roomID,
-	).Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt)
+	).Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt, &rm.UnreadCount)
 	return rm, err
 }
 
@@ -83,7 +94,17 @@ func (r *Repository) GetUserRooms(ctx context.Context, userID string) ([]Room, e
 		            )
 		            ELSE r.name
 		        END,
-		        r.is_dm, r.created_by, r.created_at
+		        r.is_dm, r.created_by, r.created_at,
+		        COALESCE((
+		            SELECT COUNT(*)
+		            FROM messages m
+		            WHERE m.room_id = r.id
+		              AND m.sender_id != $1
+		              AND NOT EXISTS (
+		                  SELECT 1 FROM message_reads mr 
+		                  WHERE mr.message_id = m.id AND mr.user_id = $1
+		              )
+		        ), 0) AS unread_count
 		 FROM rooms r JOIN room_members rm ON r.id=rm.room_id
 		 WHERE rm.user_id=$1 ORDER BY r.created_at DESC`, userID)
 	if err != nil {
@@ -93,7 +114,7 @@ func (r *Repository) GetUserRooms(ctx context.Context, userID string) ([]Room, e
 	var rooms []Room
 	for rows.Next() {
 		var rm Room
-		if err := rows.Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt); err != nil {
+		if err := rows.Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt, &rm.UnreadCount); err != nil {
 			return nil, err
 		}
 		rooms = append(rooms, rm)
@@ -246,4 +267,33 @@ func (r *Repository) MarkRead(ctx context.Context, messageID, userID string) err
 		`INSERT INTO message_reads (message_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
 		messageID, userID)
 	return err
+}
+
+func (r *Repository) MarkRoomAsRead(ctx context.Context, roomID, userID string) error {
+	_, err := r.db.ExecContext(ctx,
+		`INSERT INTO message_reads (message_id, user_id)
+		 SELECT m.id, $2
+		 FROM messages m
+		 WHERE m.room_id = $1 AND m.sender_id != $2
+		 ON CONFLICT DO NOTHING`,
+		roomID, userID)
+	return err
+}
+
+func (r *Repository) GetRoomMemberIDs(ctx context.Context, roomID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT user_id FROM room_members WHERE room_id=$1`, roomID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var userIDs []string
+	for rows.Next() {
+		var uid string
+		if err := rows.Scan(&uid); err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, uid)
+	}
+	return userIDs, rows.Err()
 }

@@ -18,27 +18,35 @@ type userMsg struct {
 	payload []byte
 }
 
+type memberBroadcastMsg struct {
+	memberIDs []string
+	payload   []byte
+	except    *Client
+}
+
 type Hub struct {
-	clients     map[*Client]bool
-	userClients map[string]map[*Client]bool // userID → set of clients
-	rooms       map[string]map[*Client]bool // roomID → set of clients
-	Register    chan *Client
-	Unregister  chan *Client
-	Broadcast   chan broadcastMsg
-	SendUser    chan userMsg
-	roomRepo    *room.Repository
+	clients          map[*Client]bool
+	userClients      map[string]map[*Client]bool // userID → set of clients
+	rooms            map[string]map[*Client]bool // roomID → set of clients
+	Register         chan *Client
+	Unregister       chan *Client
+	Broadcast        chan broadcastMsg
+	BroadcastMembers chan memberBroadcastMsg
+	SendUser         chan userMsg
+	roomRepo         *room.Repository
 }
 
 func NewHub(roomRepo *room.Repository) *Hub {
 	return &Hub{
-		clients:     make(map[*Client]bool),
-		userClients: make(map[string]map[*Client]bool),
-		rooms:       make(map[string]map[*Client]bool),
-		Register:    make(chan *Client),
-		Unregister:  make(chan *Client),
-		Broadcast:   make(chan broadcastMsg, 256),
-		SendUser:    make(chan userMsg, 128),
-		roomRepo:    roomRepo,
+		clients:          make(map[*Client]bool),
+		userClients:      make(map[string]map[*Client]bool),
+		rooms:            make(map[string]map[*Client]bool),
+		Register:         make(chan *Client),
+		Unregister:       make(chan *Client),
+		Broadcast:        make(chan broadcastMsg, 256),
+		BroadcastMembers: make(chan memberBroadcastMsg, 256),
+		SendUser:         make(chan userMsg, 128),
+		roomRepo:         roomRepo,
 	}
 }
 
@@ -95,6 +103,24 @@ func (h *Hub) Run() {
 				}
 			}
 
+		case bm := <-h.BroadcastMembers:
+			for _, uid := range bm.memberIDs {
+				if clients, ok := h.userClients[uid]; ok {
+					for c := range clients {
+						if c == bm.except {
+							continue
+						}
+						select {
+						case c.send <- bm.payload:
+						default:
+							delete(h.clients, c)
+							delete(clients, c)
+							close(c.send)
+						}
+					}
+				}
+			}
+
 		case um := <-h.SendUser:
 			if clients, ok := h.userClients[um.userID]; ok {
 				for c := range clients {
@@ -113,6 +139,10 @@ func (h *Hub) Run() {
 
 func (h *Hub) SendToUser(userID string, payload []byte) {
 	h.SendUser <- userMsg{userID: userID, payload: payload}
+}
+
+func (h *Hub) BroadcastToMembers(memberIDs []string, payload []byte, except *Client) {
+	h.BroadcastMembers <- memberBroadcastMsg{memberIDs: memberIDs, payload: payload, except: except}
 }
 
 func (h *Hub) JoinRoom(c *Client, roomID string) {

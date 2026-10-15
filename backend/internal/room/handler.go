@@ -135,6 +135,35 @@ func (h *Handler) CreateDM(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userRoom)
 }
 
+// MarkRoomAsRead handles POST /api/rooms/{id}/read
+func (h *Handler) MarkRoomAsRead(w http.ResponseWriter, r *http.Request) {
+	val := r.Context().Value(ctxkey.UserIDKey)
+	if val == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userID := val.(string)
+
+	roomID := r.PathValue("id")
+	if roomID == "" {
+		parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		// ["api", "rooms", "{id}", "read"]
+		if len(parts) >= 3 {
+			roomID = parts[2]
+		}
+	}
+	if roomID == "" {
+		http.Error(w, "room_id required", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.repo.MarkRoomAsRead(r.Context(), roomID, userID); err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // GetMessages handles GET /api/rooms/{id}/messages
 func (h *Handler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	// path: /api/rooms/{id}/messages
