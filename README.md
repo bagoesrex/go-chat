@@ -1,5 +1,7 @@
 # go-chat
 
+Live: [go-chat-rex.vercel.app](https://go-chat-rex.vercel.app)
+
 Platform chat realtime berperforma tinggi dengan backend **Go**, frontend **React + Vite**, dan desain bertema **Neo-Brutalism**.
 
 ---
