@@ -10,23 +10,29 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		origin := r.Header.Get("Origin")
-		return origin == "http://localhost:5173" || origin == ""
-	},
-}
-
 type WSHandler struct {
-	hub       *Hub
-	userRepo  *user.Repository
-	jwtSecret string
+	hub          *Hub
+	userRepo     *user.Repository
+	jwtSecret    string
+	clientOrigin string
+	upgrader     websocket.Upgrader
 }
 
-func NewHandler(hub *Hub, userRepo *user.Repository, secret string) *WSHandler {
-	return &WSHandler{hub: hub, userRepo: userRepo, jwtSecret: secret}
+func NewHandler(hub *Hub, userRepo *user.Repository, secret, clientOrigin string) *WSHandler {
+	return &WSHandler{
+		hub:          hub,
+		userRepo:     userRepo,
+		jwtSecret:    secret,
+		clientOrigin: clientOrigin,
+		upgrader: websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			CheckOrigin: func(r *http.Request) bool {
+				origin := r.Header.Get("Origin")
+				return origin == clientOrigin || origin == ""
+			},
+		},
+	}
 }
 
 func (h *WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +51,7 @@ func (h *WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user not found", http.StatusUnauthorized)
 		return
 	}
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("ws upgrade: %v", err)
 		return

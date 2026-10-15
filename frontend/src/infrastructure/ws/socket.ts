@@ -14,6 +14,8 @@ let ws: WebSocket | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let joinedRooms = new Set<string>()
 
+const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8080'
+
 function clearTimer() {
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
 }
@@ -22,7 +24,7 @@ export function wsConnect(token: string) {
   if (ws && ws.readyState <= WebSocket.OPEN) return
   clearTimer()
 
-  ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`)
+  ws = new WebSocket(`${WS_BASE}/ws?token=${token}`)
 
   ws.onopen = () => {
     // re-join rooms after reconnect

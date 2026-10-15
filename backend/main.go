@@ -30,7 +30,7 @@ func main() {
 	userHandler := user.NewHandler(userRepo)
 	hub := ws.NewHub(roomRepo)
 	go hub.Run()
-	wsHandler := ws.NewHandler(hub, userRepo, cfg.JWTSecret)
+	wsHandler := ws.NewHandler(hub, userRepo, cfg.JWTSecret, cfg.ClientOrigin)
 
 	roomHandler := room.NewHandler(roomRepo, hub)
 
@@ -56,14 +56,14 @@ func main() {
 	// WebSocket
 	mux.Handle("GET /ws", wsHandler)
 
-	handler := corsMiddleware(mux)
+	handler := corsMiddleware(mux, cfg.ClientOrigin)
 	log.Printf("listening on :%s", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, handler))
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
+func corsMiddleware(next http.Handler, clientOrigin string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		w.Header().Set("Access-Control-Allow-Origin", clientOrigin)
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		if r.Method == http.MethodOptions {
