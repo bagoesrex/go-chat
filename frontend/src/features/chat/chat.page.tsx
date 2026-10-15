@@ -41,10 +41,10 @@ export function ChatPage() {
           </div>
           <div className={styles.headerTitles}>
             <span className={styles.roomName}>
-              {room ? (room.is_dm ? 'Direct Message' : room.name) : 'Memuat room...'}
+              {room ? (room.is_dm ? `@${room.name}` : `#${room.name}`) : 'Memuat room...'}
             </span>
             <span className={styles.roomMeta}>
-              {room?.is_dm ? 'Percakapan Pribadi' : 'Public Room • Realtime Aktif'}
+              {room?.is_dm ? 'Direct Message • Percakapan Pribadi' : 'Public Channel • Realtime Aktif'}
             </span>
           </div>
         </div>

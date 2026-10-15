@@ -7,15 +7,26 @@ import styles from './user-search.module.css'
 
 interface Props {
   onSelect(roomId: string): void
+  isOpen?: boolean
+  onClose?(): void
 }
 
-export function UserSearch({ onSelect }: Props) {
+export function UserSearch({ onSelect, isOpen, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<User[]>([])
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const { createDM } = useRoomStore()
+
+  const open = isOpen !== undefined ? isOpen : internalOpen
+
+  function handleClose() {
+    if (onClose) onClose()
+    setInternalOpen(false)
+    setQuery('')
+    setResults([])
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value
@@ -34,9 +45,7 @@ export function UserSearch({ onSelect }: Props) {
     setBusy(true)
     try {
       const room = await createDM(user.id)
-      setOpen(false)
-      setQuery('')
-      setResults([])
+      handleClose()
       onSelect(room.id)
     } finally {
       setBusy(false)
@@ -44,9 +53,10 @@ export function UserSearch({ onSelect }: Props) {
   }
 
   if (!open) {
+    if (isOpen !== undefined) return null
     return (
       <div className={styles.toggleWrapper}>
-        <button className={styles.toggleBtn} onClick={() => setOpen(true)}>
+        <button className={styles.toggleBtn} onClick={() => setInternalOpen(true)}>
           <Search width={14} height={14} strokeWidth={2.2} />
           <span>Cari User / Mulai DM</span>
         </button>
@@ -69,7 +79,7 @@ export function UserSearch({ onSelect }: Props) {
         />
         <button
           className={styles.closeBtn}
-          onClick={() => { setOpen(false); setQuery(''); setResults([]) }}
+          onClick={handleClose}
           aria-label="Tutup pencarian"
         >
           <Xmark width={15} height={15} strokeWidth={2.2} />

@@ -5,7 +5,6 @@ import { useAuthStore } from '@/store/auth.store'
 import { useRoomStore } from '@/store/room.store'
 import { Logo } from '@/icons/logo'
 import { RoomList } from './room-list'
-import { UserSearch } from './user-search'
 import styles from './layout.module.css'
 
 export function RoomsLayout() {
@@ -64,7 +63,6 @@ export function RoomsLayout() {
           </div>
         </div>
 
-        <UserSearch onSelect={handleSelectRoom} />
         <RoomList activeId={activeId} onSelect={handleSelectRoom} />
       </aside>
 

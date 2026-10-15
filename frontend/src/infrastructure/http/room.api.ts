@@ -6,6 +6,16 @@ export const roomApi: RoomRepository = {
     const res = await apiFetch('/api/rooms')
     return res.json()
   },
+  async explore() {
+    const res = await apiFetch('/api/rooms/explore')
+    return res.json()
+  },
+  async join(roomId) {
+    const res = await apiFetch(`/api/rooms/${roomId}/join`, {
+      method: 'POST',
+    })
+    return res.json()
+  },
   async create(name) {
     const res = await apiFetch('/api/rooms', {
       method: 'POST',

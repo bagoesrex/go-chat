@@ -6,6 +6,7 @@ type ServerMsg =
   | { type: 'message'; room_id: string; message: Message }
   | { type: 'read'; room_id: string; message_id: string; user_id: string }
   | { type: 'presence'; user_id: string; username: string; status: 'online' | 'offline' }
+  | { type: 'room_created'; room: import('@/core/entities').Room }
   | { type: 'error'; message: string }
 
 let ws: WebSocket | null = null
@@ -33,6 +34,8 @@ export function wsConnect(token: string) {
 
     if (data.type === 'message') {
       useChatStore.getState().appendMessage(data.room_id, data.message)
+    } else if (data.type === 'room_created') {
+      useRoomStore.getState().upsertRoom(data.room)
     }
     // ponytail: presence + read stored in stores when Sprint 3+ needs badges/receipts
   }

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Room } from '@/core/entities'
+import type { Room, ExploreRoom } from '@/core/entities'
 import { roomApi } from '@/infrastructure/http/room.api'
 import { createRoomUseCase } from '@/core/usecases/room.usecase'
 
@@ -12,6 +12,9 @@ interface RoomState {
   fetchRooms(): Promise<void>
   createRoom(name: string): Promise<Room>
   createDM(targetUserId: string): Promise<Room>
+  joinRoom(roomId: string): Promise<Room>
+  exploreRooms(): Promise<ExploreRoom[]>
+  upsertRoom(room: Room): void
   setActive(id: string): void
 }
 
@@ -39,12 +42,33 @@ export const useRoomStore = create<RoomState>((set, _get) => ({
   async createDM(targetUserId) {
     const room = await useCase.createDM(targetUserId)
     set((s) => ({
-      // avoid duplicate if DM room already exists
-      rooms: s.rooms.find((r) => r.id === room.id)
+      rooms: s.rooms.some((r) => r.id === room.id)
+        ? s.rooms.map((r) => (r.id === room.id ? room : r))
+        : [room, ...s.rooms],
+    }))
+    return room
+  },
+
+  async joinRoom(roomId) {
+    const room = await useCase.join(roomId)
+    set((s) => ({
+      rooms: s.rooms.some((r) => r.id === room.id)
         ? s.rooms
         : [room, ...s.rooms],
     }))
     return room
+  },
+
+  async exploreRooms() {
+    return useCase.explore()
+  },
+
+  upsertRoom(room) {
+    set((s) => ({
+      rooms: s.rooms.some((r) => r.id === room.id)
+        ? s.rooms.map((r) => (r.id === room.id ? room : r))
+        : [room, ...s.rooms],
+    }))
   },
 
   setActive(id) {

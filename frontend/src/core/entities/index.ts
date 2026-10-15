@@ -13,6 +13,15 @@ export interface Room {
   created_at: string
 }
 
+export interface ExploreRoom {
+  id: string
+  name: string
+  created_by: string
+  created_at: string
+  member_count: number
+  is_joined: boolean
+}
+
 export interface Message {
   id: string
   room_id: string

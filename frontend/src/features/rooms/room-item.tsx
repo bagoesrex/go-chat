@@ -23,7 +23,9 @@ export function RoomItem({ room, active, onClick }: Props) {
             <Hashtag width={13} height={13} strokeWidth={2.2} />
           )}
         </span>
-        <span className={styles.name}>{room.is_dm ? 'DM' : room.name}</span>
+        <span className={styles.name}>
+          {room.is_dm ? `@${room.name}` : `#${room.name}`}
+        </span>
         {active && <span className={styles.activePill} />}
       </button>
     </li>
