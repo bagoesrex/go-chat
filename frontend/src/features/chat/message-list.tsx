@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useLayoutEffect } from 'react'
 import { ChatBubble, ArrowDown } from 'iconoir-react'
 import type { Message } from '@/core/entities'
 import { useChatStore } from '@/store/chat.store'
@@ -16,10 +16,33 @@ export function MessageList({ roomId, messages, loading }: Props) {
   const listRef = useRef<HTMLDivElement>(null)
   const { loadMore, hasMore } = useChatStore()
 
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
+  const lastScrolledRoomRef = useRef<string | null>(null)
+  const prevMsgLengthRef = useRef<number>(messages.length)
+
+  // Auto-scroll: INSTANT when switching/loading room, smooth ONLY when new messages arrive while reading
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list || !messages.length) return
+
+    const isNewRoom = lastScrolledRoomRef.current !== roomId
+
+    if (isNewRoom) {
+      // Instant snap to bottom before paint so user never sees an ugly top-to-bottom scroll animation
+      list.scrollTop = list.scrollHeight
+      lastScrolledRoomRef.current = roomId
+      prevMsgLengthRef.current = messages.length
+      return
+    }
+
+    // New messages arrived in the currently open room
+    if (messages.length > prevMsgLengthRef.current) {
+      const isNearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 250
+      if (isNearBottom) {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
+      prevMsgLengthRef.current = messages.length
+    }
+  }, [roomId, messages.length])
 
   async function handleLoadMore() {
     const list = listRef.current

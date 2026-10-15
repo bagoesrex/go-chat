@@ -64,8 +64,8 @@ export function ChatPage() {
         </div>
       </header>
 
-      {/* Only this viewport animates on room change (scoped to chat messages) */}
-      <div key={id} className={styles.viewport}>
+      {/* Stable viewport without remounting or color-flashing on room change */}
+      <div className={styles.viewport}>
         {id && <MessageList roomId={id} messages={msgs} loading={isLoading} />}
       </div>
 

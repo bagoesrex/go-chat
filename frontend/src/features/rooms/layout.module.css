@@ -24,7 +24,7 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
-  background: var(--surface);
+  background: var(--bg);
 }
 
 .mainVisible {
