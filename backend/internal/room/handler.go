@@ -8,9 +8,18 @@ import (
 	"github.com/bagoesrex/go-chat/backend/internal/ctxkey"
 )
 
-type Handler struct{ repo *Repository }
+type RealtimeNotifier interface {
+	SendToUser(userID string, payload []byte)
+}
 
-func NewHandler(repo *Repository) *Handler { return &Handler{repo: repo} }
+type Handler struct {
+	repo     *Repository
+	notifier RealtimeNotifier
+}
+
+func NewHandler(repo *Repository, notifier RealtimeNotifier) *Handler {
+	return &Handler{repo: repo, notifier: notifier}
+}
 
 func (h *Handler) ListRooms(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(ctxkey.UserIDKey).(string)
@@ -21,6 +30,20 @@ func (h *Handler) ListRooms(w http.ResponseWriter, r *http.Request) {
 	}
 	if rooms == nil {
 		rooms = []Room{}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rooms)
+}
+
+func (h *Handler) ExploreRooms(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(ctxkey.UserIDKey).(string)
+	rooms, err := h.repo.GetExploreRooms(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	if rooms == nil {
+		rooms = []ExploreRoom{}
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(rooms)
@@ -45,6 +68,37 @@ func (h *Handler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(rm)
 }
 
+func (h *Handler) JoinRoom(w http.ResponseWriter, r *http.Request) {
+	val := r.Context().Value(ctxkey.UserIDKey)
+	if val == nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userID := val.(string)
+
+	roomID := r.PathValue("id")
+	if roomID == "" {
+		parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		// ["api", "rooms", "{id}", "join"]
+		if len(parts) >= 3 {
+			roomID = parts[2]
+		}
+	}
+	if roomID == "" {
+		http.Error(w, "room_id required", http.StatusBadRequest)
+		return
+	}
+
+	rm, err := h.repo.JoinRoom(r.Context(), roomID, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rm)
+}
+
 func (h *Handler) CreateDM(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(ctxkey.UserIDKey).(string)
 	var body struct {
@@ -59,8 +113,26 @@ func (h *Handler) CreateDM(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+
+	userRoom, err := h.repo.GetRoomByID(r.Context(), rm.ID, userID)
+	if err != nil {
+		userRoom = rm
+	}
+
+	// Realtime notify target user through WS hub
+	if h.notifier != nil {
+		targetRoom, err := h.repo.GetRoomByID(r.Context(), rm.ID, body.TargetUserID)
+		if err == nil {
+			payload, _ := json.Marshal(map[string]any{
+				"type": "room_created",
+				"room": targetRoom,
+			})
+			h.notifier.SendToUser(body.TargetUserID, payload)
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(rm)
+	json.NewEncoder(w).Encode(userRoom)
 }
 
 // GetMessages handles GET /api/rooms/{id}/messages

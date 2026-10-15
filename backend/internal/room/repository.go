@@ -3,6 +3,7 @@ package room
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/bagoesrex/go-chat/backend/internal/user"
@@ -14,6 +15,15 @@ type Room struct {
 	IsDM      bool      `json:"is_dm"`
 	CreatedBy string    `json:"created_by"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type ExploreRoom struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	CreatedBy   string    `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	MemberCount int       `json:"member_count"`
+	IsJoined    bool      `json:"is_joined"`
 }
 
 type Message struct {
@@ -43,9 +53,37 @@ func (r *Repository) Create(ctx context.Context, name, createdBy string) (Room, 
 	return rm, err
 }
 
+func (r *Repository) GetRoomByID(ctx context.Context, roomID, userID string) (Room, error) {
+	var rm Room
+	err := r.db.QueryRowContext(ctx,
+		`SELECT r.id,
+		        CASE 
+		            WHEN r.is_dm = TRUE THEN COALESCE(
+		                (SELECT u.username FROM room_members other_rm JOIN users u ON u.id=other_rm.user_id
+		                 WHERE other_rm.room_id=r.id AND other_rm.user_id!=$1 LIMIT 1),
+		                r.name
+		            )
+		            ELSE r.name
+		        END,
+		        r.is_dm, r.created_by, r.created_at
+		 FROM rooms r
+		 WHERE r.id=$2`, userID, roomID,
+	).Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt)
+	return rm, err
+}
+
 func (r *Repository) GetUserRooms(ctx context.Context, userID string) ([]Room, error) {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT r.id, r.name, r.is_dm, r.created_by, r.created_at
+		`SELECT r.id,
+		        CASE 
+		            WHEN r.is_dm = TRUE THEN COALESCE(
+		                (SELECT u.username FROM room_members other_rm JOIN users u ON u.id=other_rm.user_id
+		                 WHERE other_rm.room_id=r.id AND other_rm.user_id!=$1 LIMIT 1),
+		                r.name
+		            )
+		            ELSE r.name
+		        END,
+		        r.is_dm, r.created_by, r.created_at
 		 FROM rooms r JOIN room_members rm ON r.id=rm.room_id
 		 WHERE rm.user_id=$1 ORDER BY r.created_at DESC`, userID)
 	if err != nil {
@@ -61,6 +99,48 @@ func (r *Repository) GetUserRooms(ctx context.Context, userID string) ([]Room, e
 		rooms = append(rooms, rm)
 	}
 	return rooms, rows.Err()
+}
+
+func (r *Repository) GetExploreRooms(ctx context.Context, userID string) ([]ExploreRoom, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT r.id, r.name, r.created_by, r.created_at,
+		        COUNT(rm.user_id) AS member_count,
+		        EXISTS(SELECT 1 FROM room_members user_rm WHERE user_rm.room_id=r.id AND user_rm.user_id=$1) AS is_joined
+		 FROM rooms r
+		 LEFT JOIN room_members rm ON r.id=rm.room_id
+		 WHERE r.is_dm=FALSE
+		 GROUP BY r.id, r.name, r.created_by, r.created_at
+		 ORDER BY is_joined ASC, member_count DESC, r.created_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var rooms []ExploreRoom
+	for rows.Next() {
+		var er ExploreRoom
+		if err := rows.Scan(&er.ID, &er.Name, &er.CreatedBy, &er.CreatedAt, &er.MemberCount, &er.IsJoined); err != nil {
+			return nil, err
+		}
+		rooms = append(rooms, er)
+	}
+	return rooms, rows.Err()
+}
+
+func (r *Repository) JoinRoom(ctx context.Context, roomID, userID string) (Room, error) {
+	var rm Room
+	err := r.db.QueryRowContext(ctx,
+		`SELECT id, name, is_dm, created_by, created_at FROM rooms WHERE id=$1`, roomID,
+	).Scan(&rm.ID, &rm.Name, &rm.IsDM, &rm.CreatedBy, &rm.CreatedAt)
+	if err != nil {
+		return rm, err
+	}
+	if rm.IsDM {
+		return rm, errors.New("cannot join DM room")
+	}
+	_, err = r.db.ExecContext(ctx,
+		`INSERT INTO room_members (room_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
+		roomID, userID)
+	return rm, err
 }
 
 func (r *Repository) GetOrCreateDM(ctx context.Context, userA, userB string) (Room, error) {

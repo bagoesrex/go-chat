@@ -13,23 +13,32 @@ type broadcastMsg struct {
 	except  *Client // nil = send to all
 }
 
+type userMsg struct {
+	userID  string
+	payload []byte
+}
+
 type Hub struct {
-	clients    map[*Client]bool
-	rooms      map[string]map[*Client]bool // roomID → set of clients
-	Register   chan *Client
-	Unregister chan *Client
-	Broadcast  chan broadcastMsg
-	roomRepo   *room.Repository
+	clients     map[*Client]bool
+	userClients map[string]map[*Client]bool // userID → set of clients
+	rooms       map[string]map[*Client]bool // roomID → set of clients
+	Register    chan *Client
+	Unregister  chan *Client
+	Broadcast   chan broadcastMsg
+	SendUser    chan userMsg
+	roomRepo    *room.Repository
 }
 
 func NewHub(roomRepo *room.Repository) *Hub {
 	return &Hub{
-		clients:    make(map[*Client]bool),
-		rooms:      make(map[string]map[*Client]bool),
-		Register:   make(chan *Client),
-		Unregister: make(chan *Client),
-		Broadcast:  make(chan broadcastMsg, 256),
-		roomRepo:   roomRepo,
+		clients:     make(map[*Client]bool),
+		userClients: make(map[string]map[*Client]bool),
+		rooms:       make(map[string]map[*Client]bool),
+		Register:    make(chan *Client),
+		Unregister:  make(chan *Client),
+		Broadcast:   make(chan broadcastMsg, 256),
+		SendUser:    make(chan userMsg, 128),
+		roomRepo:    roomRepo,
 	}
 }
 
@@ -38,12 +47,22 @@ func (h *Hub) Run() {
 		select {
 		case c := <-h.Register:
 			h.clients[c] = true
+			if h.userClients[c.userID] == nil {
+				h.userClients[c.userID] = make(map[*Client]bool)
+			}
+			h.userClients[c.userID][c] = true
 			h.broadcastPresence(c, "online")
 
 		case c := <-h.Unregister:
 			if h.clients[c] {
 				h.broadcastPresence(c, "offline") // before removing from rooms
 				delete(h.clients, c)
+				if uc := h.userClients[c.userID]; uc != nil {
+					delete(uc, c)
+					if len(uc) == 0 {
+						delete(h.userClients, c.userID)
+					}
+				}
 				close(c.send)
 				for roomID, members := range h.rooms {
 					if members[c] {
@@ -66,11 +85,34 @@ func (h *Hub) Run() {
 				default:
 					// slow client: drop and disconnect
 					delete(h.clients, c)
+					if uc := h.userClients[c.userID]; uc != nil {
+						delete(uc, c)
+						if len(uc) == 0 {
+							delete(h.userClients, c.userID)
+						}
+					}
 					close(c.send)
+				}
+			}
+
+		case um := <-h.SendUser:
+			if clients, ok := h.userClients[um.userID]; ok {
+				for c := range clients {
+					select {
+					case c.send <- um.payload:
+					default:
+						delete(h.clients, c)
+						delete(clients, c)
+						close(c.send)
+					}
 				}
 			}
 		}
 	}
+}
+
+func (h *Hub) SendToUser(userID string, payload []byte) {
+	h.SendUser <- userMsg{userID: userID, payload: payload}
 }
 
 func (h *Hub) JoinRoom(c *Client, roomID string) {

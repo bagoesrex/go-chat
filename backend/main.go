@@ -28,11 +28,11 @@ func main() {
 
 	authHandler := auth.NewHandler(userRepo, cfg.JWTSecret)
 	userHandler := user.NewHandler(userRepo)
-	roomHandler := room.NewHandler(roomRepo)
-
 	hub := ws.NewHub(roomRepo)
 	go hub.Run()
 	wsHandler := ws.NewHandler(hub, userRepo, cfg.JWTSecret)
+
+	roomHandler := room.NewHandler(roomRepo, hub)
 
 	jwtMiddleware := auth.Middleware(cfg.JWTSecret)
 
@@ -46,8 +46,10 @@ func main() {
 	mux.Handle("GET /api/users/me", jwtMiddleware(http.HandlerFunc(userHandler.Me)))
 	mux.Handle("GET /api/users/search", jwtMiddleware(http.HandlerFunc(userHandler.Search)))
 	mux.Handle("GET /api/rooms", jwtMiddleware(http.HandlerFunc(roomHandler.ListRooms)))
+	mux.Handle("GET /api/rooms/explore", jwtMiddleware(http.HandlerFunc(roomHandler.ExploreRooms)))
 	mux.Handle("POST /api/rooms", jwtMiddleware(http.HandlerFunc(roomHandler.CreateRoom)))
 	mux.Handle("POST /api/rooms/dm", jwtMiddleware(http.HandlerFunc(roomHandler.CreateDM)))
+	mux.Handle("POST /api/rooms/{id}/join", jwtMiddleware(http.HandlerFunc(roomHandler.JoinRoom)))
 	mux.Handle("GET /api/rooms/", jwtMiddleware(http.HandlerFunc(roomHandler.GetMessages)))
 
 	// WebSocket
