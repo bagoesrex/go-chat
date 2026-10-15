@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { WarningCircle } from 'iconoir-react'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Logo } from '@/icons/logo'
@@ -13,7 +14,16 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [lastError, setLastError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  function navigateTo(path: string) {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => { navigate(path) })
+    } else {
+      navigate(path)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -21,13 +31,11 @@ export function RegisterPage() {
     setLoading(true)
     try {
       await register(username, email, password)
-      if (document.startViewTransition) {
-        document.startViewTransition(() => { navigate('/rooms') })
-      } else {
-        navigate('/rooms')
-      }
+      navigateTo('/rooms')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registrasi gagal')
+      const msg = err instanceof Error ? err.message : 'Registrasi gagal'
+      setError(msg)
+      setLastError(msg)
     } finally {
       setLoading(false)
     }
@@ -68,14 +76,30 @@ export function RegisterPage() {
             required
             minLength={6}
           />
-          {error && <p className={styles.errorMsg}>{error}</p>}
+          <div
+            className={`${styles.errorWrapper} ${error ? styles.errorVisible : ''}`}
+            aria-live="polite"
+          >
+            <div className={styles.errorInner}>
+              <div className={styles.errorMsg} role="alert">
+                <WarningCircle width={16} height={16} strokeWidth={2.2} className={styles.errorIcon} />
+                <span>{error || lastError}</span>
+              </div>
+            </div>
+          </div>
           <Button type="submit" loading={loading} style={{ width: '100%' }}>
             Buat Akun
           </Button>
         </form>
         <p className={styles.footer}>
           Sudah punya akun?{' '}
-          <Link to="/login" className={styles.link}>Masuk</Link>
+          <button
+            type="button"
+            onClick={() => navigateTo('/login')}
+            className={styles.link}
+          >
+            Masuk
+          </button>
         </p>
       </div>
     </div>

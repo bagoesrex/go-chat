@@ -2,6 +2,7 @@
   font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 600;
+  min-height: 42px;
   padding: 0.55rem 1.1rem;
   border: var(--border);
   cursor: pointer;
