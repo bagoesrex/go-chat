@@ -1,3 +1,4 @@
+import { Check } from 'iconoir-react'
 import type { Message } from '@/core/entities'
 import { useAuthStore } from '@/store/auth.store'
 import styles from './message-bubble.module.css'
@@ -17,11 +18,18 @@ export function MessageBubble({ message }: Props) {
   return (
     <div className={`${styles.wrapper} ${isMine ? styles.mine : ''}`}>
       {!isMine && (
-        <span className={styles.sender}>{message.sender.username}</span>
+        <span className={styles.sender}>@{message.sender.username}</span>
       )}
-      <div className={`${styles.bubble} ${isMine ? styles.bubbleMine : ''}`}>
+      <div className={`${styles.bubble} ${isMine ? styles.bubbleMine : styles.bubbleOther}`}>
         <p className={styles.content}>{message.content}</p>
-        <span className={styles.time}>{formatTime(message.created_at)}</span>
+        <div className={styles.metaRow}>
+          <span className={styles.time}>{formatTime(message.created_at)}</span>
+          {isMine && (
+            <span className={styles.checkIcon}>
+              <Check width={12} height={12} strokeWidth={2.5} />
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )

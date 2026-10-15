@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Send } from 'iconoir-react'
 import { wsSendMessage } from '@/infrastructure/ws/socket'
 import styles from './message-input.module.css'
 
@@ -26,6 +27,8 @@ export function MessageInput({ roomId }: Props) {
     }
   }
 
+  const canSend = text.trim().length > 0
+
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <input
@@ -34,11 +37,17 @@ export function MessageInput({ roomId }: Props) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ketik pesan..."
+        placeholder="Tulis pesan... (Enter untuk kirim)"
         autoComplete="off"
       />
-      <button type="submit" className={styles.sendBtn} disabled={!text.trim()}>
-        Kirim
+      <button
+        type="submit"
+        className={styles.sendBtn}
+        disabled={!canSend}
+        aria-label="Kirim pesan"
+      >
+        <Send width={16} height={16} strokeWidth={2.2} />
+        <span className={styles.sendText}>Kirim</span>
       </button>
     </form>
   )

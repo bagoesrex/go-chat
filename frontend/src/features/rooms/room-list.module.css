@@ -8,17 +8,60 @@
 .toolbar {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: var(--border);
-  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  border-bottom: var(--border-sm);
+  background: var(--surface);
+}
+
+.headingGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .heading {
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  flex: 1;
+  color: var(--muted);
+}
+
+.counter {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--surface-alt);
+  border: 1px solid var(--fg);
+  padding: 0.05rem 0.35rem;
+  color: var(--fg);
+}
+
+.addBtn {
+  background: var(--surface);
+  border: var(--border-sm);
+  color: var(--fg);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 1px 1px 0px #0D0D0D;
+  transition: transform 80ms ease, box-shadow 80ms ease, background-color 80ms ease;
+}
+
+.addBtn:hover {
+  background: var(--surface-alt);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #0D0D0D;
+}
+
+.addBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
 }
 
 .createForm {
@@ -27,12 +70,37 @@
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-bottom: var(--border);
+  background: var(--surface);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .hint {
-  padding: 1rem;
-  font-size: 0.85rem;
+  padding: 1.25rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.loaderDot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-2);
+  display: inline-block;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
 }
 
 .list {

@@ -1,40 +1,106 @@
 .list {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
-.hint {
+.loadingContainer,
+.emptyContainer {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.loaderBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: var(--border-sm);
+  padding: 0.6rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.loaderSquare {
+  width: 10px;
+  height: 10px;
+  background: var(--accent-2);
+  display: inline-block;
+  animation: spinSquare 1.2s infinite ease-in-out;
+}
+
+@keyframes spinSquare {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg) scale(0.8); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.emptyIconBox {
+  width: 48px;
+  height: 48px;
+  border: var(--border-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--muted);
-  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.emptyTitle {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+
+.emptySubtitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 260px;
 }
 
 .loadMore {
   align-self: center;
-  background: none;
-  border: var(--border);
+  background: var(--surface);
+  border: var(--border-sm);
   box-shadow: var(--shadow-sm);
-  padding: 0.4rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
   margin-bottom: 0.5rem;
-  transition: transform 100ms, box-shadow 100ms;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--fg);
+  transition: transform 80ms ease, box-shadow 80ms ease, background-color 80ms ease;
 }
 
 .loadMore:hover {
-  transform: translate(-2px, -2px);
+  background: var(--surface-alt);
+  transform: translate(-1.5px, -1.5px);
   box-shadow: var(--shadow);
 }
 
 .loadMore:active {
-  transform: translate(2px, 2px);
+  transform: translate(1px, 1px);
   box-shadow: none;
 }

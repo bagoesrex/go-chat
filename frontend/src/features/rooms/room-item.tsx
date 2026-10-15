@@ -1,3 +1,4 @@
+import { Hashtag, User as UserIcon } from 'iconoir-react'
 import type { Room } from '@/core/entities'
 import styles from './room-item.module.css'
 
@@ -13,9 +14,17 @@ export function RoomItem({ room, active, onClick }: Props) {
       <button
         className={`${styles.item} ${active ? styles.active : ''}`}
         onClick={onClick}
+        aria-selected={active}
       >
-        <span className={styles.hash}>#</span>
-        <span className={styles.name}>{room.is_dm ? 'dm' : room.name}</span>
+        <span className={styles.iconBox}>
+          {room.is_dm ? (
+            <UserIcon width={13} height={13} strokeWidth={2.2} />
+          ) : (
+            <Hashtag width={13} height={13} strokeWidth={2.2} />
+          )}
+        </span>
+        <span className={styles.name}>{room.is_dm ? 'DM' : room.name}</span>
+        {active && <span className={styles.activePill} />}
       </button>
     </li>
   )

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import { ChatBubble, ArrowDown } from 'iconoir-react'
 import type { Message } from '@/core/entities'
 import { useChatStore } from '@/store/chat.store'
 import { MessageBubble } from './message-bubble'
@@ -15,7 +16,7 @@ export function MessageList({ roomId, messages, loading }: Props) {
   const listRef = useRef<HTMLDivElement>(null)
   const { loadMore, hasMore } = useChatStore()
 
-  // auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
@@ -24,21 +25,40 @@ export function MessageList({ roomId, messages, loading }: Props) {
     const list = listRef.current
     const prevHeight = list?.scrollHeight ?? 0
     await loadMore(roomId)
-    // restore scroll position after prepend
     if (list) {
       list.scrollTop = list.scrollHeight - prevHeight
     }
   }
 
   if (loading && !messages.length) {
-    return <div className={styles.hint}>Memuat pesan...</div>
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loaderBox}>
+          <span className={styles.loaderSquare} />
+          <span className={styles.loadingText}>Memuat riwayat percakapan...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!loading && !messages.length) {
+    return (
+      <div className={styles.emptyContainer}>
+        <div className={styles.emptyIconBox}>
+          <ChatBubble width={28} height={28} strokeWidth={2} />
+        </div>
+        <p className={styles.emptyTitle}>Belum ada pesan</p>
+        <p className={styles.emptySubtitle}>Jadilah orang pertama yang mengirim pesan di sini!</p>
+      </div>
+    )
   }
 
   return (
     <div className={styles.list} ref={listRef}>
       {hasMore[roomId] && (
         <button className={styles.loadMore} onClick={handleLoadMore}>
-          Muat lebih banyak
+          <ArrowDown width={13} height={13} strokeWidth={2.2} />
+          <span>Muat riwayat sebelumnya</span>
         </button>
       )}
       {messages.map((msg) => (

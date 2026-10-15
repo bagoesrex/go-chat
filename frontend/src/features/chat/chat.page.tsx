@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
+import { Hashtag, User as UserIcon } from 'iconoir-react'
 import { useRoomStore } from '@/store/room.store'
 import { useChatStore } from '@/store/chat.store'
 import { wsJoin, wsLeave } from '@/infrastructure/ws/socket'
@@ -24,20 +25,43 @@ export function ChatPage() {
     return () => { wsLeave(id) }
   }, [id, fetchMessages])
 
-  if (!room) return null
-
-  const msgs = messages[id!] ?? []
-  const isLoading = loading[id!] ?? false
+  const msgs = id ? (messages[id] ?? []) : []
+  const isLoading = id ? (loading[id] ?? false) : false
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <span className={styles.roomName}>
-          {room.is_dm ? 'DM' : `#${room.name}`}
-        </span>
+        <div className={styles.headerLeft}>
+          <div className={styles.roomIcon}>
+            {room?.is_dm ? (
+              <UserIcon width={16} height={16} strokeWidth={2.2} />
+            ) : (
+              <Hashtag width={16} height={16} strokeWidth={2.2} />
+            )}
+          </div>
+          <div className={styles.headerTitles}>
+            <span className={styles.roomName}>
+              {room ? (room.is_dm ? 'Direct Message' : room.name) : 'Memuat room...'}
+            </span>
+            <span className={styles.roomMeta}>
+              {room?.is_dm ? 'Percakapan Pribadi' : 'Public Room • Realtime Aktif'}
+            </span>
+          </div>
+        </div>
+        <div className={styles.headerRight}>
+          <span className={styles.liveIndicator}>
+            <span className={styles.liveDot} />
+            <span className={styles.liveText}>live</span>
+          </span>
+        </div>
       </header>
-      <MessageList roomId={id!} messages={msgs} loading={isLoading} />
-      <MessageInput roomId={id!} />
+
+      {/* Only this viewport animates on room change (scoped to chat messages) */}
+      <div key={id} className={styles.viewport}>
+        {id && <MessageList roomId={id} messages={msgs} loading={isLoading} />}
+      </div>
+
+      {id && <MessageInput roomId={id} />}
     </div>
   )
 }

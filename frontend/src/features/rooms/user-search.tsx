@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Search, User as UserIcon, Xmark } from 'iconoir-react'
 import type { User } from '@/core/entities'
 import { userApi } from '@/infrastructure/http/user.api'
 import { useRoomStore } from '@/store/room.store'
@@ -44,15 +45,21 @@ export function UserSearch({ onSelect }: Props) {
 
   if (!open) {
     return (
-      <button className={styles.toggleBtn} onClick={() => setOpen(true)}>
-        + DM / Cari user
-      </button>
+      <div className={styles.toggleWrapper}>
+        <button className={styles.toggleBtn} onClick={() => setOpen(true)}>
+          <Search width={14} height={14} strokeWidth={2.2} />
+          <span>Cari User / Mulai DM</span>
+        </button>
+      </div>
     )
   }
 
   return (
     <div className={styles.panel}>
       <div className={styles.searchRow}>
+        <span className={styles.searchIcon}>
+          <Search width={15} height={15} strokeWidth={2.2} />
+        </span>
         <input
           className={styles.input}
           placeholder="Cari username..."
@@ -60,7 +67,13 @@ export function UserSearch({ onSelect }: Props) {
           onChange={handleChange}
           autoFocus
         />
-        <button className={styles.closeBtn} onClick={() => { setOpen(false); setQuery(''); setResults([]) }}>✕</button>
+        <button
+          className={styles.closeBtn}
+          onClick={() => { setOpen(false); setQuery(''); setResults([]) }}
+          aria-label="Tutup pencarian"
+        >
+          <Xmark width={15} height={15} strokeWidth={2.2} />
+        </button>
       </div>
       {results.length > 0 && (
         <ul className={styles.list}>
@@ -71,14 +84,18 @@ export function UserSearch({ onSelect }: Props) {
                 onClick={() => handleStartDM(u)}
                 disabled={busy}
               >
-                @{u.username}
+                <div className={styles.userAvatar}>
+                  <UserIcon width={13} height={13} strokeWidth={2.2} />
+                </div>
+                <span className={styles.userName}>@{u.username}</span>
+                <span className={styles.dmLabel}>Kirim Pesan</span>
               </button>
             </li>
           ))}
         </ul>
       )}
       {query && results.length === 0 && (
-        <p className={styles.empty}>Tidak ditemukan.</p>
+        <p className={styles.empty}>User "{query}" tidak ditemukan.</p>
       )}
     </div>
   )

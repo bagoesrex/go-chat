@@ -1,17 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg:        #F5F0E8;
-  --fg:        #0A0A0A;
-  --accent:    #FF3B30;
-  --accent-2:  #0057FF;
-  --muted:     #888;
-  --border:    2px solid #0A0A0A;
-  --shadow:    4px 4px 0px #0A0A0A;
-  --shadow-sm: 2px 2px 0px #0A0A0A;
-  --radius:    0px;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --bg:          #F7F4EE;
+  --surface:     #FFFFFF;
+  --surface-alt: #EFE9DE;
+  --fg:          #0D0D0D;
+  --accent:      #FF3333;
+  --accent-2:    #0052FF;
+  --accent-green:#10B981;
+  --muted:       #64748B;
+  --border:      2px solid #0D0D0D;
+  --border-sm:   1.5px solid #0D0D0D;
+  --shadow:      4px 4px 0px #0D0D0D;
+  --shadow-sm:   2px 2px 0px #0D0D0D;
+  --radius:      0px;
+  --font-mono:   'JetBrains Mono', 'Courier New', monospace;
+  --font-sans:   'Inter', system-ui, -apple-system, sans-serif;
 }
 
 *, *::before, *::after {
@@ -26,20 +30,47 @@ body {
   font-family: var(--font-sans);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-a { color: inherit; text-decoration: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
+/* Custom Brutalist Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-left: 1px solid rgba(13, 13, 13, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-alt);
+  border: 1.5px solid var(--fg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg);
+}
+
+/* Page Level View Transition (Auth <-> Rooms) */
 ::view-transition-old(root) {
-  animation: 180ms ease-out both vt-fade-out;
+  animation: 160ms ease-out both vt-fade-out;
 }
+
 ::view-transition-new(root) {
-  animation: 180ms ease-in both vt-fade-in;
+  animation: 160ms ease-in both vt-fade-in;
 }
 
 @keyframes vt-fade-out {
-  to { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 0; transform: scale(0.99); }
 }
+
 @keyframes vt-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: scale(1.01); }
 }

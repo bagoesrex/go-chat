@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Plus, Xmark } from 'iconoir-react'
 import { useRoomStore } from '@/store/room.store'
 import { RoomItem } from './room-item'
 import { Button } from '@/components/button'
@@ -33,30 +34,54 @@ export function RoomList({ activeId, onSelect }: Props) {
   return (
     <div className={styles.container}>
       <div className={styles.toolbar}>
-        <span className={styles.heading}>Rooms</span>
-        <Button variant="ghost" onClick={() => setCreating((v) => !v)}>
-          {creating ? '✕' : '+'}
-        </Button>
+        <div className={styles.headingGroup}>
+          <span className={styles.heading}>Rooms</span>
+          <span className={styles.counter}>{rooms.length}</span>
+        </div>
+        <button
+          className={styles.addBtn}
+          onClick={() => setCreating((v) => !v)}
+          aria-label={creating ? 'Batal buat room' : 'Buat room baru'}
+          title={creating ? 'Batal' : 'Buat room'}
+        >
+          {creating ? (
+            <Xmark width={14} height={14} strokeWidth={2.5} />
+          ) : (
+            <Plus width={14} height={14} strokeWidth={2.5} />
+          )}
+        </button>
       </div>
 
       {creating && (
         <form onSubmit={handleCreate} className={styles.createForm}>
           <Input
-            placeholder="Nama room..."
+            placeholder="Nama room (cth: random)..."
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
           />
-          <Button type="submit" loading={busy}>Buat</Button>
+          <div className={styles.formActions}>
+            <Button type="button" variant="ghost" onClick={() => setCreating(false)}>
+              Batal
+            </Button>
+            <Button type="submit" loading={busy}>
+              Buat
+            </Button>
+          </div>
         </form>
       )}
 
       {loading && !rooms.length && (
-        <p className={styles.hint}>Memuat...</p>
+        <div className={styles.hint}>
+          <span className={styles.loaderDot} />
+          <span>Memuat daftar room...</span>
+        </div>
       )}
 
       {!loading && !rooms.length && (
-        <p className={styles.hint}>Belum ada room.</p>
+        <div className={styles.hint}>
+          <span>Belum ada room. Buat yang pertama di atas!</span>
+        </div>
       )}
 
       <ul className={styles.list}>
