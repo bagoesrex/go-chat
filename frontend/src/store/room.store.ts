@@ -15,7 +15,9 @@ interface RoomState {
   joinRoom(roomId: string): Promise<Room>
   exploreRooms(): Promise<ExploreRoom[]>
   upsertRoom(room: Room): void
-  setActive(id: string): void
+  incrementUnread(roomId: string): void
+  clearUnread(roomId: string): void
+  setActive(id: string | null): void
 }
 
 export const useRoomStore = create<RoomState>((set, _get) => ({
@@ -68,6 +70,26 @@ export const useRoomStore = create<RoomState>((set, _get) => ({
       rooms: s.rooms.some((r) => r.id === room.id)
         ? s.rooms.map((r) => (r.id === room.id ? room : r))
         : [room, ...s.rooms],
+    }))
+  },
+
+  incrementUnread(roomId) {
+    set((s) => ({
+      rooms: s.rooms.map((r) =>
+        r.id === roomId
+          ? { ...r, unread_count: (r.unread_count ?? 0) + 1 }
+          : r
+      ),
+    }))
+  },
+
+  clearUnread(roomId) {
+    set((s) => ({
+      rooms: s.rooms.map((r) =>
+        r.id === roomId && (r.unread_count ?? 0) > 0
+          ? { ...r, unread_count: 0 }
+          : r
+      ),
     }))
   },
 

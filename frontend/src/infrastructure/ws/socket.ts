@@ -1,5 +1,6 @@
 import { useChatStore } from '@/store/chat.store'
 import { useRoomStore } from '@/store/room.store'
+import { useAuthStore } from '@/store/auth.store'
 import type { Message } from '@/core/entities'
 
 type ServerMsg =
@@ -34,6 +35,11 @@ export function wsConnect(token: string) {
 
     if (data.type === 'message') {
       useChatStore.getState().appendMessage(data.room_id, data.message)
+      const currentActive = useRoomStore.getState().activeRoomId
+      const currentUserId = useAuthStore.getState().user?.id
+      if (data.room_id !== currentActive && data.message.sender.id !== currentUserId) {
+        useRoomStore.getState().incrementUnread(data.room_id)
+      }
     } else if (data.type === 'room_created') {
       useRoomStore.getState().upsertRoom(data.room)
     }

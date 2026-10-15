@@ -9,5 +9,6 @@ export function createRoomUseCase(repo: RoomRepository) {
     createDM: (targetUserId: string) => repo.createDM(targetUserId),
     getMessages: (roomId: string, before?: string, limit = 50) =>
       repo.getMessages(roomId, before, limit),
+    markAsRead: (roomId: string) => repo.markAsRead(roomId),
   }
 }

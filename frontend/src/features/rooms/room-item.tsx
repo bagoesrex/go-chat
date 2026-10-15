@@ -9,6 +9,9 @@ interface Props {
 }
 
 export function RoomItem({ room, active, onClick }: Props) {
+  const unread = room.unread_count ?? 0
+  const showUnread = !active && unread > 0
+
   return (
     <li>
       <button
@@ -26,6 +29,11 @@ export function RoomItem({ room, active, onClick }: Props) {
         <span className={styles.name}>
           {room.is_dm ? `@${room.name}` : `#${room.name}`}
         </span>
+        {showUnread && (
+          <span className={styles.unreadBadge}>
+            {unread > 99 ? '99+' : unread}
+          </span>
+        )}
         {active && <span className={styles.activePill} />}
       </button>
     </li>

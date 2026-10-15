@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Hashtag, User as UserIcon } from 'iconoir-react'
 import { useRoomStore } from '@/store/room.store'
 import { useChatStore } from '@/store/chat.store'
+import { roomApi } from '@/infrastructure/http/room.api'
 import { wsJoin, wsLeave } from '@/infrastructure/ws/socket'
 import { MessageList } from './message-list'
 import { MessageInput } from './message-input'
@@ -18,11 +19,18 @@ export function ChatPage() {
   useEffect(() => {
     if (!id) return
     wsJoin(id)
+    useRoomStore.getState().setActive(id)
+    useRoomStore.getState().clearUnread(id)
+    roomApi.markAsRead(id).catch(() => {})
+
     if (!fetched.current[id]) {
       fetched.current[id] = true
       fetchMessages(id)
     }
-    return () => { wsLeave(id) }
+    return () => {
+      wsLeave(id)
+      useRoomStore.getState().setActive(null)
+    }
   }, [id, fetchMessages])
 
   const msgs = id ? (messages[id] ?? []) : []

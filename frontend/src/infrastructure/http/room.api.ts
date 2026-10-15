@@ -36,4 +36,9 @@ export const roomApi: RoomRepository = {
     const res = await apiFetch(`/api/rooms/${roomId}/messages?${params}`)
     return res.json()
   },
+  async markAsRead(roomId) {
+    await apiFetch(`/api/rooms/${roomId}/read`, {
+      method: 'POST',
+    })
+  },
 }

@@ -56,3 +56,25 @@
   flex-shrink: 0;
   box-shadow: 0 0 0 1px #fff;
 }
+
+.unreadBadge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.4rem;
+  background: var(--fg);
+  color: #FFFFFF;
+  border: 1px solid var(--fg);
+  box-shadow: 1px 1px 0px #0D0D0D;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: badgePop 140ms ease-out;
+}
+
+@keyframes badgePop {
+  from { transform: scale(0.75); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

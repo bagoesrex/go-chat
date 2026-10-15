@@ -7,4 +7,5 @@ export interface RoomRepository {
   create(name: string): Promise<Room>
   createDM(targetUserId: string): Promise<Room>
   getMessages(roomId: string, before?: string, limit?: number): Promise<Message[]>
+  markAsRead(roomId: string): Promise<void>
 }

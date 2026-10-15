@@ -26,6 +26,9 @@ export function RoomList({ activeId, onSelect }: Props) {
   const channels = rooms.filter((r) => !r.is_dm)
   const directMessages = rooms.filter((r) => r.is_dm)
 
+  const channelsUnread = channels.reduce((sum, r) => sum + (r.unread_count ?? 0), 0)
+  const dmsUnread = directMessages.reduce((sum, r) => sum + (r.unread_count ?? 0), 0)
+
   async function handleCreateChannel(e: React.FormEvent) {
     e.preventDefault()
     if (!channelName.trim()) return
@@ -59,6 +62,11 @@ export function RoomList({ activeId, onSelect }: Props) {
             </span>
             <span className={styles.sectionTitle}>Channels</span>
             <span className={styles.counter}>{channels.length}</span>
+            {!channelsOpen && channelsUnread > 0 && (
+              <span className={styles.unreadPill} title={`${channelsUnread} unread`}>
+                {channelsUnread}
+              </span>
+            )}
           </button>
 
           <div className={styles.headerActions}>
@@ -159,6 +167,11 @@ export function RoomList({ activeId, onSelect }: Props) {
             </span>
             <span className={styles.sectionTitle}>Direct Messages</span>
             <span className={styles.counter}>{directMessages.length}</span>
+            {!dmsOpen && dmsUnread > 0 && (
+              <span className={styles.unreadPill} title={`${dmsUnread} unread`}>
+                {dmsUnread}
+              </span>
+            )}
           </button>
 
           <div className={styles.headerActions}>
