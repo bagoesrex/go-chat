@@ -18,6 +18,7 @@ interface RoomState {
   incrementUnread(roomId: string): void
   clearUnread(roomId: string): void
   setActive(id: string | null): void
+  reset(): void
 }
 
 export const useRoomStore = create<RoomState>((set, _get) => ({
@@ -95,6 +96,10 @@ export const useRoomStore = create<RoomState>((set, _get) => ({
 
   setActive(id) {
     set({ activeRoomId: id })
+  },
+
+  reset() {
+    set({ rooms: [], activeRoomId: null, loading: false })
   },
 }))
 

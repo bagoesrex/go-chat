@@ -3,6 +3,8 @@ import type { User } from '@/core/entities'
 import { authApi } from '@/infrastructure/http/auth.api'
 import { createAuthUseCase } from '@/core/usecases/auth.usecase'
 import { wsConnect, wsDisconnect } from '@/infrastructure/ws/socket'
+import { useRoomStore } from './room.store'
+import { useChatStore } from './chat.store'
 
 const useCase = createAuthUseCase(authApi)
 
@@ -29,6 +31,8 @@ export const useAuthStore = create<AuthState>((set) => {
       const { user, token } = await useCase.login(email, password)
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
+      useRoomStore.getState().reset()
+      useChatStore.getState().reset()
       wsConnect(token)
       set({ token, user })
     },
@@ -37,6 +41,8 @@ export const useAuthStore = create<AuthState>((set) => {
       const { user, token } = await useCase.register(username, email, password)
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
+      useRoomStore.getState().reset()
+      useChatStore.getState().reset()
       wsConnect(token)
       set({ token, user })
     },
@@ -45,6 +51,8 @@ export const useAuthStore = create<AuthState>((set) => {
       wsDisconnect()
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      useRoomStore.getState().reset()
+      useChatStore.getState().reset()
       set({ token: null, user: null })
     },
   }

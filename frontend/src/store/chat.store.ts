@@ -13,6 +13,7 @@ interface ChatState {
   fetchMessages(roomId: string): Promise<void>
   loadMore(roomId: string): Promise<void>
   appendMessage(roomId: string, msg: Message): void
+  reset(): void
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -61,5 +62,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
         [roomId]: [...(s.messages[roomId] ?? []), msg],
       },
     }))
+  },
+
+  reset() {
+    set({ messages: {}, hasMore: {}, loading: {} })
   },
 }))

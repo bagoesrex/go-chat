@@ -13,6 +13,7 @@ type ServerMsg =
 let ws: WebSocket | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let joinedRooms = new Set<string>()
+let currentToken: string | null = null
 
 const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8080'
 
@@ -21,17 +22,32 @@ function clearTimer() {
 }
 
 export function wsConnect(token: string) {
-  if (ws && ws.readyState <= WebSocket.OPEN) return
+  if (!token) return
+
+  // If already connected with the same token, do not recreate
+  if (ws && currentToken === token && ws.readyState <= WebSocket.OPEN) {
+    return
+  }
+
+  // If previous socket exists (different token or broken state), cleanly tear it down
+  if (ws) {
+    wsDisconnect()
+  }
+
   clearTimer()
+  currentToken = token
 
-  ws = new WebSocket(`${WS_BASE}/ws?token=${token}`)
+  const socket = new WebSocket(`${WS_BASE}/ws?token=${token}`)
+  ws = socket
 
-  ws.onopen = () => {
+  socket.onopen = () => {
+    if (ws !== socket) return
     // re-join rooms after reconnect
     joinedRooms.forEach((id) => wsSend({ type: 'join', room_id: id }))
   }
 
-  ws.onmessage = (ev) => {
+  socket.onmessage = (ev) => {
+    if (ws !== socket) return
     let data: ServerMsg
     try { data = JSON.parse(ev.data) } catch { return }
 
@@ -48,20 +64,47 @@ export function wsConnect(token: string) {
     // ponytail: presence + read stored in stores when Sprint 3+ needs badges/receipts
   }
 
-  ws.onclose = () => {
-    ws = null
-    // ponytail: linear backoff, upgrade to exponential if flakiness is a problem
-    reconnectTimer = setTimeout(() => wsConnect(token), 3000)
+  socket.onclose = () => {
+    if (ws === socket) {
+      ws = null
+    }
+    // Only reconnect if user is still logged in with this exact token
+    const activeToken = useAuthStore.getState().token
+    if (activeToken && activeToken === currentToken) {
+      clearTimer()
+      reconnectTimer = setTimeout(() => {
+        const stillActive = useAuthStore.getState().token
+        if (stillActive && stillActive === currentToken) {
+          wsConnect(stillActive)
+        }
+      }, 3000)
+    }
   }
 
-  ws.onerror = () => ws?.close()
+  socket.onerror = () => {
+    if (ws === socket) {
+      socket.close()
+    }
+  }
 }
 
 export function wsDisconnect() {
   clearTimer()
   joinedRooms.clear()
-  ws?.close()
-  ws = null
+  currentToken = null
+  if (ws) {
+    const s = ws
+    ws = null
+    s.onopen = null
+    s.onmessage = null
+    s.onerror = null
+    s.onclose = null
+    try {
+      s.close()
+    } catch {
+      // ignore
+    }
+  }
 }
 
 export function wsJoin(roomId: string) {
