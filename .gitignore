@@ -5,3 +5,6 @@
 # Superpowers scratch
 .superpowers/
 docs/superpowers/
+
+# AI agent local cache & skills
+.opencode/
