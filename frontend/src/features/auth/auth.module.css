@@ -17,7 +17,6 @@
   padding: 2.25rem;
   background: var(--surface);
   position: relative;
-  view-transition-name: auth-card;
 }
 
 .brand {
@@ -25,7 +24,6 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
-  view-transition-name: auth-brand;
 }
 
 .brandName {

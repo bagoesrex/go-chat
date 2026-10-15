@@ -58,46 +58,9 @@ a {
   background: var(--fg);
 }
 
-/* Page Level View Transition */
+/* Page Level View Transition: Disabled full-page fade so background & layout stay solid */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 140ms;
-  animation-timing-function: ease;
-}
-
-::view-transition-old(root) {
-  animation-name: vt-fade-out;
-}
-
-::view-transition-new(root) {
-  animation-name: vt-fade-in;
-}
-
-@keyframes vt-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes vt-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Auth Card Smooth Morph */
-::view-transition-group(auth-card) {
-  animation-duration: 200ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-::view-transition-old(auth-card),
-::view-transition-new(auth-card) {
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  animation-duration: 200ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-::view-transition-group(auth-brand) {
-  animation-duration: 200ms;
+  animation: none;
+  mix-blend-mode: normal;
 }

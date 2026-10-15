@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthLayout } from '@/features/auth/auth.layout'
 import { LoginPage } from '@/features/auth/login.page'
 import { RegisterPage } from '@/features/auth/register.page'
 import { RoomsLayout } from '@/features/rooms/rooms.layout'
@@ -10,8 +11,10 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<RedirectIfAuth />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Route>
         </Route>
         <Route element={<RequireAuth />}>
           <Route path="/rooms" element={<RoomsLayout />}>
